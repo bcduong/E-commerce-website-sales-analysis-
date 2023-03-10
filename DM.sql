@@ -1,25 +1,27 @@
-#affichage de la table FacebookInsights
+GENERAL STATISTICS
+
+#Resume database
 SELECT *
 FROM FacebookInsights_csv fic 
 
 
-#Nombre d'utilisateurs engages
+#How many engaged users did the page have in the given time period?
 SELECT
 SUM(Engaged_Users) as N_Engaged_Users
 FROM FacebookInsights_csv fic 
 
-#Portee moyenne des posts
+#What is the average reach of the page's posts over the given time period?
 SELECT
 SUM(Reach) / COUNT(*) as Av_Reach
 FROM FacebookInsights_csv fic 
 
-#taux d'engagement moyen
+#Enagagement rate
 SELECT
 ((SUM(Engaged_Fans) + SUM(Engaged_Users))/Sum(Reach))*100  as Engagement_Rate
 FROM FacebookInsights_csv fic 
 
 
-# Les 10 premiers codes pays(au vu du nombre maximum de fans) 
+# Top 10 country codes (based on maximum number of fans) 
 SELECT CountryCode,
 SUM(NumberOfFans) as Country_Code
 FROM FansPerCountry_csv fpcc 
@@ -27,7 +29,7 @@ Group By CountryCode
 ORDER BY  Country_Code DESC
 LIMIT 10
 
-#les 10 premiers pays (au vu du taux de pénétration : % d'habitants d'un pays qui sont fans) 
+#Top 10 countries (based on penetration rate: % of a country's inhabitants who are fans) 
 SELECT CountryCode,
 (SUM(NumberOfFans)/(SELECT Sum(NumberOfFans) FROM FansPerCountry_csv fpcc ))*100 as Fans_Rate_ByCountry
 FROM FansPerCountry_csv fpcc 
@@ -35,7 +37,9 @@ Group By CountryCode
 ORDER BY Fans_Rate_ByCountry DESC 
 LIMIT 10
 
-#Stat par ville
+STATITICS BY CITY 
+
+#Top 10 countries (based on penetration rate: % of a country's inhabitants who are fans) 
 SELECT ccc.City, fpcc.NumberOfFans 
 FROM Population_csv pc 
 JOIN CityCountry_csv ccc on ccc.CountryCode = pc.CountryCode 
@@ -45,9 +49,9 @@ GROUP by ccc.City
 ORDER By fpcc.NumberOfFans  
 LIMIT 10
 
-#Repartition par sexe et tarnche d'age
+STATISTICS BY AGE AND SEX
 
-#Fans par tranche d'age
+#Fans by age group
 SELECT Age, 
 (SUM(NumberOfFans)/(SELECT SUM(NumberOfFans) 
 FROM FansPerGenderAge_csv fpgac))*100  as Number_fans
@@ -55,7 +59,7 @@ FROM FansPerGenderAge_csv fpgac
 GROUP BY Age 
 ORDER by Number_fans DESC 
 
-#Fans par Sexe
+#Fans by sex
 SELECt Gender,
 (SUM(NumberOfFans)/(SELECT SUM(NumberOfFans) 
 FROM FansPerGenderAge_csv fpgac))*100  as Number_fans
@@ -63,14 +67,15 @@ FROM FansPerGenderAge_csv fpgac
 GROUP BY Gender 
 ORDER by Number_fans DESC 
 
-#Nombre de jours
+#Nomber of date
 SELECT SexeAge,
 COUNT(Date) as N_days 
 FROM FansPerGenderAge_csv fpgac 
 Group By SexeAge 
 
+TIME COMITTEMENT 
 
-
+#What is the breakdown of post engagement by day of the week (Monday, Tuesday,...)?
 SELECT 
 CASE 
     WHEN DAYOFWEEK(DATE(STR_TO_DATE(created_time, '%d/%m/%Y %H:%i:%s'))) = 1 THEN 'Sunday'
@@ -89,7 +94,7 @@ GROUP BY
 ORDER BY 
   Engagement_Rate DESC;
  
- 
+ #What is the best day of the week to publish posts?
  SELECT 
 CASE 
     WHEN DAYOFWEEK(DATE(STR_TO_DATE(created_time, '%d/%m/%Y %H:%i:%s'))) = 1 THEN 'Sunday'
@@ -108,7 +113,7 @@ GROUP BY
 ORDER BY 
   Engagement_Rate DESC;
  
- 
+ #What is the distribution of post engagement by time of day?
 SELECT 
   CASE 
     WHEN FLOOR(HOUR(STR_TO_DATE(created_time, '%d/%m/%Y %H:%i:%s')) / 2) * 2 BETWEEN 0 AND 2 THEN '0-2'
